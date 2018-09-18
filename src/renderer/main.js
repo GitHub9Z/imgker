@@ -11,7 +11,6 @@ axios.defaults.baseURL = 'http://47.94.197.84:3000/api/'
 let smalltalk = require('smalltalk/legacy')
 Vue.prototype.$smalltalk = smalltalk
 
-
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
