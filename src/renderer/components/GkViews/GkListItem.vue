@@ -39,7 +39,6 @@
       load () {
         if (this.index === 'head') {
           this.defaltColor = 'rgb(82, 82, 82)'
-          alert(JSON.stringify(this.item))
         } else {
           this.defaltColor = this.index % 2 === 0 ? 'rgb(53, 53, 53)' : 'rgb(61, 61, 61)'
         }

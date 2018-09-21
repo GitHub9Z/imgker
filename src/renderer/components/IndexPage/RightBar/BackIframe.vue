@@ -42,6 +42,10 @@
           <img v-if="!isChoosed" src='@/assets/icon/edit_up_icon.png'>
         </div>
         <div class="block"></div>
+        <div class="arrow-content">
+          <img class="arrow" :src="backArrowUrl" @click="onBackClick">
+          <img class="arrow" :src="frontArrowUrl" @click="onFrontClick">
+        </div>
       </div>
       <gk-list class="data-base-content" :datalist="showdblist" :box=true></gk-list>
     </div>
@@ -78,7 +82,8 @@
         apilist: [],
         dblist: [],
         showdblist: [],
-        menulist: []
+        menulist: [],
+        page: 1
       }
     },
     created () {
@@ -91,6 +96,14 @@
         } else {
           return true
         }
+      },
+      backArrowUrl () {
+        if (this.page === 1) return require('@/assets/icon/arrow_back_false_icon.png')
+        else return require('@/assets/icon/arrow_back_true_icon.png')
+      },
+      frontArrowUrl () {
+        if (this.page > (this.dblist.length / 40)) return require('@/assets/icon/arrow_front_false_icon.png')
+        else return require('@/assets/icon/arrow_front_true_icon.png')
       }
     },
     methods: {
@@ -128,6 +141,7 @@
         let temp = this.menulist[index]
         this.menulist[index] = this.menulist[0]
         this.menulist[0] = temp
+        this.page = 1
         this.$axios.get('getDB', {
           params: data
         })
@@ -135,7 +149,7 @@
             thiz.$store.commit('CLEAR_LIST')
             let resdata = response.data
             thiz.dblist = resdata.data
-            thiz.showdblist = JSON.parse(JSON.stringify(resdata.data))
+            thiz.showdblist = JSON.parse(JSON.stringify(resdata.data)).slice((thiz.page - 1) * 40, thiz.page * 40)
           })
           .catch(function (error) {
             thiz.$smalltalk.alert('加载文件', '请检查网络连接')
@@ -148,7 +162,7 @@
         this.$store.commit('CLEAR_LIST')
         let filter = data.text
         if (filter === '' || filter === null) {
-          this.showdblist = this.dblist
+          this.showdblist = this.dblist.slice((this.page - 1) * 40, this.page * 40)
         } else {
           this.showdblist = []
           for (let index in this.dblist) {
@@ -225,6 +239,18 @@
             break
         }
       },
+      onBackClick () {
+        if (this.page > 1) {
+          this.page--
+          this.showdblist = JSON.parse(JSON.stringify(this.dblist)).slice((this.page - 1) * 40, this.page * 40)
+        }
+      },
+      onFrontClick () {
+        if (this.page < (this.dblist.length / 40)) {
+          this.page++
+          this.showdblist = JSON.parse(JSON.stringify(this.dblist)).slice((this.page - 1) * 40, this.page * 40)
+        }
+      },
       onMouseOver (data) {
         switch (data) {
           case 'view':
@@ -278,7 +304,7 @@
               .then(function (response) {
                 let resdata = response.data
                 thiz.dblist = resdata.data
-                thiz.showdblist = JSON.parse(JSON.stringify(resdata.data))
+                thiz.showdblist = JSON.parse(JSON.stringify(resdata.data)).slice((thiz.page - 1) * 40, thiz.page * 40)
               })
               .catch(function (error) {
                 thiz.$smalltalk.alert('加载文件', '请检查网络连接')
@@ -398,9 +424,23 @@
 
   .block {
     height: 40px;
-    width: 100%;
+    width: calc(100% - 600px);
     margin: 0 0 0 3px;
     background: rgb(71, 71, 71);
+  }
+
+  .arrow-content {
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: rgb(71, 71, 71);
+  }
+
+  .arrow {
+    height: 25px;
+    width: 25px;
+    margin: 0 10px;
   }
 
   .icon-first {
