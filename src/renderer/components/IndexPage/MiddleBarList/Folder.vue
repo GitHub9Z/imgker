@@ -1,6 +1,6 @@
 <template>
   <!-- index{middle-bar-list{folder{*}}} -->
-  <div class='folders'>
+  <div class='folders' draggable='true' @dragstart.stop="drag($event)" @drop.stop="drop($event)" @dragover.stop="allowDrop($event)" @dragenter.stop="enter($event)" @dragleave.stop="leave($event)" :style="{background: isDragedOver?'rgb(87, 86, 86)':''}">
     <div class='folder' @click="onClick" @contextmenu.stop="handlerFiles">
       <img class='arrow' :src="arrowURL">{{item.name}}<img class='circle' src='@/assets/icon/circle_green_icon.png' :style='{display: fathStatus}'>
     </div>
@@ -18,7 +18,8 @@
         fileslist: '',
         childStatus: 'block',
         fathStatus: 'none',
-        arrowURL: require('@/assets/icon/down_arrow_icon.png')
+        arrowURL: require('@/assets/icon/down_arrow_icon.png'),
+        isDragedOver: false
         // arrowURL: '@/assets/icon/down_arrow_icon.png"'
       }
     },
@@ -37,6 +38,32 @@
     methods: {
       getFilesList () {
         // wait-for-add
+      },
+      drag () {
+        this.$store.commit('DRAG_ITEM', this.item)
+      },
+      drop (event) {
+        this.isDragedOver = false
+        if (this.item.id === this.$store.state.Counter.dragItem.id) return
+        let message = {
+          'oper': 'drop',
+          'id': this.item.id
+        }
+        this.$emit('childOper', message)
+      },
+      allowDrop (event) {
+        event.preventDefault()
+        this.isDragedOver = true
+        this.childStatus = 'block'
+      },
+      enter (event) {
+        this.isDragedOver = true
+        this.childStatus = 'block'
+        console.log('enter')
+      },
+      leave (event) {
+        this.isDragedOver = false
+        console.log('leave')
       },
       onClick () {
         if (this.childStatus === 'block') {
@@ -125,7 +152,8 @@
               'name': '',
               'fath': thiz.item.id,
               'kind': 'folder',
-              'url': ''
+              'url': '',
+              'lib_id': thiz.$store.state.Counter.userInfo.lib[0].id
             }
             smalltalk.prompt('新建文件夹', '请输入文件夹名称', '新建文件夹')
               .then(function (name) {
@@ -152,7 +180,8 @@
               'name': '',
               'fath': thiz.item.id,
               'kind': 'file',
-              'url': ''
+              'url': '',
+              'lib_id': thiz.$store.state.Counter.userInfo.lib[0].id
             }
             smalltalk.prompt('新建文件', '请输入文件名称', '新建文件')
               .then(function (name) {
@@ -187,7 +216,8 @@
               'name': '',
               'fath': thiz.item.id,
               'kind': 'back',
-              'url': ''
+              'url': '',
+              'lib_id': thiz.$store.state.Counter.userInfo.lib[0].id
             }
             smalltalk.prompt('新建后台', '请输入后台名称', '新建后台')
               .then(function (name) {
@@ -241,6 +271,17 @@
     align-items: center;
     font-size: 15px;
     color: rgb(211, 211, 211);
+  }
+
+  .folder:hover {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: rgb(124, 122, 248);
   }
 
   .child-folder {

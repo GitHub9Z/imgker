@@ -4,6 +4,7 @@
     <div class="box-back">
       <div class='box-block' v-if="isChoosed"></div>
     </div>
+    {{changeChecked}}
   </div>
 </template>
 
@@ -20,6 +21,9 @@
     updated () {
     },
     computed: {
+      changeChecked () {
+        if (this.item.length === 2) this.isChecked = this.item[1].isR
+      },
       isChoosed () {
         if (this.item.length === 1) {
           let item = this.item[0]
@@ -40,6 +44,7 @@
     methods: {
       onClick () {
         this.isChecked = !this.isChecked
+        if (this.item.length === 2) this.item[1].isR = this.isChecked
         this.$store.commit('CLICK_LIST_ITEM', this.item)
       }
     }

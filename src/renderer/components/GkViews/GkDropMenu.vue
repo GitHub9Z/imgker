@@ -2,9 +2,9 @@
   <!-- gk-drop-menu{*} -->
   <div class='menu-content'>
     <div class='menu-list'  @mouseleave="onMouseOut('list')">
-      <a class='current-item' @mouseenter="onMouseOver(0)" @mouseleave="onMouseOut(0)" @click="onActiveClick()" :style="{background: activeItem===0?activeColor:normalColor}">{{menulist[0]}}</a>
+      <div class='item current-item' @mouseenter="onMouseOver(0)" @mouseleave="onMouseOut(0)" @click="onActiveClick()" :style="{background: activeItem===0?activeColor:normalColor}">{{menulist[0]}}</div>
       <div class="hidden-items" :style="{display: isOpen?'block':'none'}">
-        <a class='another-item' v-if="index !== 0" v-for="(item, index) in menulist" :key="item" @mouseenter="onMouseOver(index)" @mouseleave="onMouseOut(index)" @click="onNormalClick(item,index)" :style="{background: activeItem===index?activeColor:normalColor}">{{item}}</a>
+        <div class='item another-item' v-if="index !== 0" v-for="(item, index) in menulist" :key="item" @mouseenter="onMouseOver(index)" @mouseleave="onMouseOut(index)" @click="onNormalClick(item,index)" :style="{background: activeItem===index?activeColor:normalColor}">{{item}}</div>
       </div>
     </div>
   </div>
@@ -67,19 +67,19 @@
     width: 150px;
   }
 
-  a {
-    padding: 5px 15px;
+  .item {
+    padding: 12px 15px;
     height: 40px;
     width: 150px;
     text-decoration: none;
-    text-align: center;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
     font-size: 16px;
     font-weight: bold;
+    text-align: left;
     color: azure;
     background: rgb(71, 71, 71);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .menu-content li {

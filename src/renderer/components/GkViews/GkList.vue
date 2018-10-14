@@ -9,7 +9,7 @@
 <script>
   import GkListItem from '@/components/GkViews/GkListItem'
   export default {
-    props: ['datalist', 'box'],
+    props: ['datalist', 'box', 'order'],
     components: {
       GkListItem
     },
@@ -27,7 +27,11 @@
           }
           return item
         } else {
-          return this.datalist[0]
+          if (this.order === 'none') {
+            return this.datalist[0]
+          } else {
+            return this.order
+          }
         }
       }
     },

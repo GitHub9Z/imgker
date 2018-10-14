@@ -13,7 +13,7 @@
     <div class="bar-content">
       <div class="bar api-bar" @mouseenter="onMouseOver('api')" @mouseleave="onMouseOut('api')" @click="onBarClick('api')" :style="{background: isapishow?'rgb(2, 109, 2)':apiColor}">管理员接口</div>
     </div>
-    <gk-list class="api-content" :datalist="apilist" v-if="isapishow" :box=false></gk-list>
+    <gk-list class="api-content" :datalist="apilist" v-if="isapishow" :box=false order="none"></gk-list>
     <div class="bar-content">
       <div class="bar data-base-bar" @mouseenter="onMouseOver('db')" @mouseleave="onMouseOut('db')" @click="onBarClick('db')" :style="{background: isdbshow?'rgb(2, 109, 2)':dbColor}">数据库管理</div>
     </div>
@@ -47,7 +47,7 @@
           <img class="arrow" :src="frontArrowUrl" @click="onFrontClick">
         </div>
       </div>
-      <gk-list class="data-base-content" :datalist="showdblist" :box=true></gk-list>
+      <gk-list class="data-base-content" :datalist="showdblist" :box=true :order="menuitems[menulist[0]]"></gk-list>
     </div>
     <gk-prompt :object="promptItem" @childOper="onChildOper" :style="{display: ispromptshow?'block':'none'}"></gk-prompt>
   </div>
@@ -60,7 +60,7 @@
   import GkPrompt from '@/components/GkViews/GkPrompt'
   import GkDataBox from '@/components/GkViews/GkDataBox'
   export default {
-    props: [],
+    props: ['url'],
     components: {
       GkList,
       GkDropMenu,
@@ -83,6 +83,7 @@
         dblist: [],
         showdblist: [],
         menulist: [],
+        menuitems: {},
         page: 1
       }
     },
@@ -102,7 +103,7 @@
         else return require('@/assets/icon/arrow_back_true_icon.png')
       },
       frontArrowUrl () {
-        if (this.page > (this.dblist.length / 40)) return require('@/assets/icon/arrow_front_false_icon.png')
+        if (this.page >= (this.dblist.length / 40)) return require('@/assets/icon/arrow_front_false_icon.png')
         else return require('@/assets/icon/arrow_front_true_icon.png')
       }
     },
@@ -136,13 +137,18 @@
         }
       },
       onMenuClick (data) {
+        this.$store.commit('SET_IS_LOADING', true)
         let thiz = this
         let index = data.index
         let temp = this.menulist[index]
         this.menulist[index] = this.menulist[0]
         this.menulist[0] = temp
         this.page = 1
-        this.$axios.get('getDB', {
+        this.$log({
+          title: 'getDB',
+          output: 'GET: ' + this.url + '/api/getDB'
+        })
+        this.$axios.get(this.url + '/api/getDB', {
           params: data
         })
           .then(function (response) {
@@ -150,8 +156,16 @@
             let resdata = response.data
             thiz.dblist = resdata.data
             thiz.showdblist = JSON.parse(JSON.stringify(resdata.data)).slice((thiz.page - 1) * 40, thiz.page * 40)
+            thiz.$log({
+              title: 'getDB',
+              output: 'RESPONSE: ' + JSON.stringify(response, Object.keys(response), 1000)
+            })
+            thiz.$store.commit('SET_IS_LOADING', false)
           })
           .catch(function (error) {
+            thiz.$store.commit('CLEAR_LIST')
+            thiz.dblist = []
+            thiz.showdblist = []
             thiz.$smalltalk.alert('加载文件', '请检查网络连接')
               .then(() => {
                 console.log(error)
@@ -181,30 +195,47 @@
       onEditClick () {
         if (this.$store.state.Counter.choosedItems.length > 1) {
           let item = {}
-          for (let key in this.dblist[0]) {
+          for (let key in this.menuitems[this.menulist[0]]) {
             item[key] = 'DEFAULT'
           }
           this.promptItem = item
           this.promptModel = 'multiEdit'
         } else if (this.$store.state.Counter.choosedItems.length === 1) {
-          this.promptItem = JSON.parse(JSON.stringify(this.$store.state.Counter.choosedItems[0]))
+          let item = this.$store.state.Counter.choosedItems[0]
+          let temp = JSON.parse(JSON.stringify(this.menuitems[this.menulist[0]]))
+          for (let key in temp) {
+            if (item.hasOwnProperty(key)) {
+              temp[key] = item[key]
+            }
+          }
+          this.$log({
+            title: 'prompt',
+            output: 'MODEL: ' + JSON.stringify(temp, Object.keys(temp), 1000)
+          })
+          this.promptItem = temp
           this.promptModel = 'edit'
         } else return
         this.ispromptshow = true
       },
       onAddClick () {
         this.ispromptshow = true
+        /* {unite-order{deprecated v0->v1.0.0}
         let item = {}
         for (let key in this.dblist[0]) {
           item[key] = ''
         }
-        this.promptItem = item
+        */
+        this.promptItem = this.menuitems[this.menulist[0]]
         this.promptModel = 'edit'
       },
       onDeleteClick () {
         let thiz = this
         if (thiz.$store.state.Counter.choosedItems.length < 1) return
-        this.$axios.get('delete', {
+        thiz.$log({
+          title: 'delete',
+          output: 'GET: ' + thiz.url + '/api/delete'
+        })
+        this.$axios.get(this.url + '/api/delete', {
           params: {
             'db': thiz.menulist[0],
             'items': JSON.stringify(thiz.$store.state.Counter.choosedItems)
@@ -215,10 +246,12 @@
             let message = {
               'oper': 'loadData'
             }
+            thiz.$log({
+              title: 'delete',
+              output: 'RESPONSE: ' + JSON.stringify(response, Object.keys(response), 1000)
+            })
             thiz.$emit('childOper', message)
-            thiz.$smalltalk.alert('删除', '删除成功')
-              .then(() => {
-              })
+            thiz.$toast(' S U C C E S S')
           })
           .catch(function (error) {
             thiz.$smalltalk.alert('删除', error)
@@ -278,9 +311,11 @@
         }
       },
       loadData () {
+        this.$store.commit('SET_IS_LOADING', true)
         let thiz = this
+        thiz.$store.commit('CLEAR_LIST')
         let data = ''
-        this.$axios.get('getApiList', data)
+        this.$axios.get(this.url + '/api/getApiList', data)
           .then(function (response) {
             let resdata = response.data
             thiz.apilist = resdata.data
@@ -291,20 +326,22 @@
                 console.log(error)
               })
           })
-        this.$axios.get('getDBList', data)
+        this.$axios.get(this.url + '/api/getDBList', data)
           .then(function (response) {
             let resdata = response.data
-            thiz.menulist = resdata.data
+            if (thiz.menulist.length !== resdata.data.list.length) thiz.menulist = resdata.data.list
+            thiz.menuitems = resdata.data.items
             let data = {
               'dataContent': thiz.menulist[0]
             }
-            thiz.$axios.get('getDB', {
+            thiz.$axios.get(thiz.url + '/api/getDB', {
               params: data
             })
               .then(function (response) {
                 let resdata = response.data
                 thiz.dblist = resdata.data
                 thiz.showdblist = JSON.parse(JSON.stringify(resdata.data)).slice((thiz.page - 1) * 40, thiz.page * 40)
+                thiz.$store.commit('SET_IS_LOADING', false)
               })
               .catch(function (error) {
                 thiz.$smalltalk.alert('加载文件', '请检查网络连接')
@@ -323,7 +360,11 @@
       onPromptSubmit (data) {
         this.ispromptshow = false
         let thiz = this
-        this.$axios.get('update', {
+        thiz.$log({
+          title: 'update',
+          output: 'DATA: ' + JSON.stringify(data.item, Object.keys(data.item), 1000)
+        })
+        this.$axios.get(this.url + '/api/update', {
           params: {
             'db': thiz.menulist[0],
             'model': thiz.promptModel,
@@ -332,15 +373,16 @@
           }
         })
           .then(function (response) {
-            thiz.$store.commit('CLEAR_LIST')
+            thiz.$log({
+              title: 'update',
+              output: 'RESPONSE: ' + JSON.stringify(response, Object.keys(response), 1000)
+            })
             thiz.onFlashClick()
             let message = {
               'oper': 'loadData'
             }
             thiz.$emit('childOper', message)
-            thiz.$smalltalk.alert('更新', '更新成功')
-              .then(() => {
-              })
+            thiz.$toast(' S U C C E S S')
           })
           .catch(function (error) {
             thiz.$smalltalk.alert('更新', error)

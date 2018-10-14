@@ -94,6 +94,7 @@
     margin: 0 20px;
     width: 100px;
     overflow-x: auto;
+    overflow-y: hidden;
     line-height:16px;
     font-size: 16px;
     color: rgb(200, 200, 200);

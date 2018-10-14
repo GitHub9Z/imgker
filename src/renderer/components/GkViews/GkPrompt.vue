@@ -71,9 +71,9 @@
   .prompt-content {
     width: 300px;
     height: 400px;
-    position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 1;
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0; z-index: 111;
     margin: auto;
-    border: 1px solid rgb(100, 100, 100);
+    box-shadow: 0px 0px 10px rgb(8, 8, 8);  
     background: rgb(53, 53, 53);
     overflow: hidden;
   }
@@ -108,6 +108,9 @@
     padding: 0 5px 0 0;
     font-weight: bold;
     text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .prompt-input {
@@ -128,10 +131,20 @@
     padding: 3px 0;
     text-align: center;
     font-size: 15px;
-    border: 1px solid rgb(88, 88, 88);
     background: rgb(34, 34, 34);
     font-weight: bold;
     color: rgb(199, 199, 199);
   }
   
+  .prompt-button:hover {
+    width: 120px;
+    height: 30px;
+    margin: 15px 0 15px 20px;
+    padding: 3px 0;
+    text-align: center;
+    font-size: 15px;
+    background: rgb(48, 48, 48);
+    font-weight: bold;
+    color: rgb(199, 199, 199);
+  }
 </style>

@@ -3,13 +3,19 @@
   <div class='middle-bar-list-content'> 
     <folder :item="item" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="item in fileslist" :key='item' v-if="item.fath===''&&item.kind==='folder'">
       <folder :item="itemTwo" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemTwo in fileslist" :key='itemTwo' v-if="itemTwo.fath===item.id&&itemTwo.kind==='folder'">
-        <folder :item="itemthree" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemthree in fileslist" :key='itemthree' v-if="itemthree.fath===itemTwo.id&&itemthree.kind==='folder'"></folder>
+        <folder :item="itemthree" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemthree in fileslist" :key='itemthree' v-if="itemthree.fath===itemTwo.id&&itemthree.kind==='folder'">
+          <folder :item="itemfour" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemfour in fileslist" :key='itemfour' v-if="itemfour.fath===itemthree.id&&itemfour.kind==='folder'">
+            <folder :item="itemfive" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemfive in fileslist" :key='itemfive' v-if="itemfive.fath===itemfour.id&&itemfive.kind==='folder'"></folder>
+            <file :item="itemfive" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemfive in fileslist" :key='itemfive' v-if="itemfive.fath===itemfour.id&&itemfive.kind!=='folder'"></file>
+          </folder>
+          <file :item="itemfour" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemfour in fileslist" :key='itemfour' v-if="itemfour.fath===itemthree.id&&itemfour.kind!=='folder'"></file>
+        </folder>
         <file :item="itemthree" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemthree in fileslist" :key='itemthree' v-if="itemthree.fath===itemTwo.id&&itemthree.kind!=='folder'"></file>
       </folder>
       <file :item="itemTwo" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemTwo in fileslist" :key='itemTwo' v-if="itemTwo.fath===item.id&&itemTwo.kind!=='folder'"></file>
     </folder>
     <file :item="item" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="item in fileslist" :key='item' v-if="item.fath===''&&item.kind!=='folder'"></file>
-    <div class='block' @contextmenu.stop="renderMenu">
+    <div class='block' @contextmenu.stop="renderMenu" @drop.stop="drop($event)" @dragover.stop="allowDrop($event)" @dragenter.stop="enter($event)" @dragleave.stop="leave($event)" :style="{background: isDragedOver?'rgb(87, 86, 86)':''}">
     <!-- {static-list{deprecated v0->v1.0.0}}
     <folder name="hello" id="1" :chooseId="chooseId" v-on:childClick="onChildClick">
       <folder name="hello-1" id="2"  :chooseId="chooseId" v-on:childClick="onChildClick">
@@ -93,7 +99,8 @@
             'kind': 'file',
             'url': 'https://blog.csdn.net/xiha_zhu/article/details/80449339'
           }
-        ]
+        ],
+        isDragedOver: false
       }
     },
     created () {
@@ -115,6 +122,26 @@
       } */
     },
     methods: {
+      drop (event) {
+        this.isDragedOver = false
+        let message = {
+          'oper': 'drop',
+          'id': ''
+        }
+        this.onChildOper(message)
+      },
+      allowDrop (event) {
+        event.preventDefault()
+        this.isDragedOver = true
+      },
+      enter (event) {
+        this.isDragedOver = true
+        console.log('enter')
+      },
+      leave (event) {
+        this.isDragedOver = false
+        console.log('leave')
+      },
       renderMenu () {
         const MenuItem = this.$electron.remote.MenuItem
         const Menu = this.$electron.remote.Menu
@@ -132,7 +159,8 @@
               'name': '',
               'fath': '',
               'kind': 'folder',
-              'url': ''
+              'url': '',
+              'lib_id': thiz.$store.state.Counter.userInfo.lib[0].id
             }
             smalltalk.prompt('新建文件夹', '请输入文件夹名称', '新建文件夹')
               .then(function (name) {
@@ -159,6 +187,7 @@
         for (index in this.fileslist) {
           if (this.fileslist[index].id === data.id && this.fileslist[index].kind !== 'folder') {
             this.fileslist[index].oper = 'click'
+            this.fileslist[index].from = 'list'
             this.$emit('childOper', this.fileslist[index])
             return
           }
@@ -180,6 +209,9 @@
             break
           case 'delete':
             this.onChildDelete(data)
+            break
+          case 'drop':
+            this.onChildDrop(data)
             break
         }
       },
@@ -205,6 +237,7 @@
             })
               .then(function (response) {
                 let message = {
+                  'from': 'list',
                   'oper': 'loadData',
                   'id': data.id
                 }
@@ -217,6 +250,30 @@
               })
           }
         }
+      },
+      onChildDrop (data) {
+        let smalltalk = require('smalltalk/legacy')
+        let thiz = this
+        let item = thiz.$store.state.Counter.dragItem
+        item.fath = data.id
+        this.$axios.get('submitFile', {
+          params: {
+            ...item
+          }
+        })
+          .then(function (response) {
+            let message = {
+              'from': 'list',
+              'oper': 'loadData',
+              'id': data.id
+            }
+            thiz.$emit('childOper', message)
+          })
+          .catch(function (error) {
+            smalltalk.alert('重命名', error)
+              .then(() => {
+              })
+          })
       },
       onChildReurl (data) {
         let index
@@ -232,6 +289,7 @@
             })
               .then(function (response) {
                 let message = {
+                  'from': 'list',
                   'oper': 'loadData',
                   'id': data.id
                 }
@@ -264,6 +322,7 @@
         })
           .then(function (response) {
             let message = {
+              'from': 'list',
               'oper': 'loadData',
               'id': data.id
             }
@@ -292,6 +351,7 @@
             })
               .then(function (response) {
                 let message = {
+                  'from': 'list',
                   'oper': 'loadData',
                   'id': data.id
                 }
@@ -330,11 +390,35 @@
 </script>
 <style>
   .middle-bar-list-content{
-    width: calc(100% + 30px);
+    width: 100%;
     height: calc(100% - 65px);
     padding: 8px 8px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: scroll;
+  }
+
+  .middle-bar-list-content::-webkit-scrollbar {/*滚动条整体样式*/
+    width: 1px;     /*高宽分别对应横竖滚动条的尺寸*/
+    height: 1px;
+  }
+
+  .middle-bar-list-content::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+    background: transparent;
+  }
+
+  .middle-bar-list-content::-webkit-scrollbar-track {/*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+    background: transparent;
+  }
+
+  .middle-bar-list-content::-webkit-scrollbar-thumb:window-inactive {
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+    background: transparent;
+  }
+
+  .middle-bar-list-content::-webkit-scrollbar-thumb:hover {
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+    background: #666666;
   }
 
   .block{

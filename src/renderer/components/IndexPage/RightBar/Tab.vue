@@ -52,6 +52,7 @@
       },
       onTabClosed () {
         let message = {
+          'from': 'tab',
           'oper': 'close',
           'id': this.item.id
         }

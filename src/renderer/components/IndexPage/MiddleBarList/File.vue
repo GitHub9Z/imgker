@@ -1,6 +1,6 @@
 <template>
   <!-- index{middle-bar-list{file{*}}} -->
-  <div class='files'>
+  <div class='files' draggable='true' @dragstart.stop='drag($event)'>
     <div class='file' @click="onClick" @contextmenu.stop="handlerFiles">
       <img class='url-icon' :src="logoURL">{{item.name}}<img class='circle' src='@/assets/icon/circle_green_icon.png' :style='{display: fileStatus}'>
     </div>
@@ -36,6 +36,9 @@
           'id': this.item.id
         }
         this.$emit('childOper', message)
+      },
+      drag (event) {
+        this.$store.commit('DRAG_ITEM', this.item)
       },
       handlerFiles () {
         let message = {
@@ -141,6 +144,17 @@
     align-items: center;
     font-size: 15px;
     color: rgb(211, 211, 211);
+  }
+
+  .file:hover {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 15px;
+    font-weight: bold;
+    color: rgb(110, 209, 64);
   }
 
   img {
