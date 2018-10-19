@@ -416,11 +416,6 @@
     background: transparent;
   }
 
-  .middle-bar-list-content::-webkit-scrollbar-thumb:hover {
-    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
-    background: #666666;
-  }
-
   .block{
     width: 100%;
     height: 100%;

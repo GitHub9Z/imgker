@@ -1,28 +1,39 @@
 <template>
   <!-- index{bottom-bar{*}} -->
   <div class='bottom-bar-content'> 
-    <div class='bottom-bar-lib' @click="handlerClick('lib')" @mouseenter="onMouseOver('libColor')" @mouseleave="onMouseOut('libColor')" :style="{background: libColor}">
-      <img class='bottom-icon' src='@/assets/icon/gker_white_icon.png' v-if="lib !== ''">
+    <div class='bottom-bar-lib' @click="handlerClick('lib')" @mouseenter="onMouseOver('libColor')" @mouseleave="onMouseOut('libColor')" :style="{background: libColor}" v-if="lib !== ''">
+      <img class='bottom-icon' src='@/assets/icon/gker_white_icon.png'>
       {{lib}}
     </div>
-    <div class='bottom-bar-user' @click="handlerClick('user')" @mouseenter="onMouseOver('userColor')" @mouseleave="onMouseOut('userColor')" :style="{background: userColor}">
+    <div class='bottom-bar-alert' @click="handlerClick('alert')" @mouseenter="onMouseOver('alertColor')" @mouseleave="onMouseOut('alertColor')" :style="{background: alertColor}" v-if="user !== ''">
+      <img class='bottom-icon' src='@/assets/icon/alert_white_icon.png'>
+    </div>
+    <div class='bottom-bar-user' @click="handlerClick('user')" @mouseenter="onMouseOver('userColor')" @mouseleave="onMouseOut('userColor')" :style="{background: userColor}" v-if="user !== ''">
       {{user}}
     </div>
+    {{showListIfLogin}}
     <gk-search @childOper="onChildOper" :style="{display: isSearchshow?'block':'none'}" :object="searchList"></gk-search>
+    <gk-message @childOper="onChildOper" :style="{display: isMessageshow?'block':'none'}" :object="messageList"></gk-message>
   </div>
 </template>
 <script>
   import GkSearch from '@/components/GkViews/GkSearch'
+  import GkMessage from '@/components/GkViews/GkMessage'
   export default {
     components: {
-      GkSearch
+      GkSearch,
+      GkMessage
     },
     data () {
       return {
         libColor: 'rgb(28, 135, 241)',
         userColor: 'rgb(28, 135, 241)',
+        alertColor: 'rgb(28, 135, 241)',
         isSearchshow: false,
-        showFrom: ''
+        isMessageshow: false,
+        messageList: [],
+        showFrom: '',
+        webSocket: 'close'
       }
     },
     created () {
@@ -30,6 +41,12 @@
     mounted () {
     },
     computed: {
+      showListIfLogin () {
+        if (this.$store.state.Counter.userInfo.lib) this.listenMsg()
+        else console.log('unlogin')
+        // if (!this.$store.state.Counter.userInfo.lib) console.log('unlogin')
+        // else this.listenMsg()
+      },
       searchList () {
         let arr = [
           {
@@ -80,6 +97,13 @@
     methods: {
       onChildOper (data) {
         switch (data.from) {
+          case 'message':
+            switch (data.oper) {
+              case 'cancel':
+                this.isMessageshow = false
+                break
+            }
+            break
           case 'search':
             switch (data.oper) {
               case 'cancel':
@@ -156,6 +180,10 @@
             this.showFrom = 'user'
             this.isSearchshow = true
             break
+          case 'alert':
+            this.listenMsg()
+            this.isMessageshow = true
+            break
         }
       },
       onMouseOver (item) {
@@ -163,6 +191,55 @@
       },
       onMouseOut (item) {
         eval('this.' + item + " = 'rgb(28, 135, 241)'")
+      },
+      createWebSocket (urlValue) {
+        if (window.WebSocket) return new WebSocket(urlValue)
+        return false
+      },
+      listenMsg () {
+        let thiz = this
+        if (this.webSocket === 'close') {
+          this.webSocket = this.createWebSocket('ws://127.0.0.1:3000')
+          this.webSocket.onopen = function (evt) {
+            console.log('进入聊天室')
+            let message = {
+              from: thiz.$store.state.Counter.userInfo.name,
+              to: 'listen',
+              content: 'null'
+            }
+            console.log(message)
+            thiz.webSocket.send(JSON.stringify(message))
+          }
+          this.webSocket.onmessage = function (evt) {
+            // 这是服务端返回的数据
+            let msg = JSON.parse(evt.data)
+            let temp = {
+              'title': thiz.$moment().format('YYYY-MM-DD HH:MM:SS'),
+              'text': msg.from,
+              'remark': msg.content,
+              'height': 17
+            }
+            let id = setInterval(() => {
+              if (temp.height > 36) {
+                // thiz.messageList.push({s: 's'})
+                // thiz.messageList.pop()
+                // thiz.messageList = JSON.parse(JSON.stringify(thiz.messageList))
+                window.clearInterval(id)
+              } else {
+                temp.height += 1
+                thiz.messageList.pop()
+                thiz.messageList.push(temp)
+              }
+            }, 10)
+            thiz.messageList.push(temp)
+            thiz.$toast(' M E S S A G E')
+          }
+          // 关闭连接
+          this.webSocket.onclose = function (evt) {
+            thiz.webSocket = 'close'
+            console.log('Connection closed.')
+          }
+        }
       }
     }
   }
@@ -198,6 +275,14 @@
     line-height: 25px;
     color: azure;
     font-size: 14px;
+    float: right;
+  }
+
+  .bottom-bar-alert {
+    height: 25px;
+    padding: 2px 2px 0 5px;
+    line-height: 25px;
+    color: azure;
     float: right;
   }
 </style>

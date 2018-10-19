@@ -16,6 +16,9 @@ axios.defaults.baseURL = 'http://47.94.197.84:3000/api/'
 let smalltalk = require('smalltalk/legacy')
 Vue.prototype.$smalltalk = smalltalk
 
+let moment = require('moment')
+Vue.prototype.$moment = moment
+
 let outputfunc = function (log) {
   log.output = coder(log.output)
   // alert(log.output)

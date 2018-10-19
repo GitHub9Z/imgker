@@ -128,7 +128,7 @@
     width: 120px;
     height: 30px;
     margin: 15px 0 15px 20px;
-    padding: 3px 0;
+    line-height: 30px;
     text-align: center;
     font-size: 15px;
     background: rgb(34, 34, 34);
@@ -140,7 +140,7 @@
     width: 120px;
     height: 30px;
     margin: 15px 0 15px 20px;
-    padding: 3px 0;
+    line-height: 30px;
     text-align: center;
     font-size: 15px;
     background: rgb(48, 48, 48);

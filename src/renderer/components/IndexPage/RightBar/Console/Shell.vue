@@ -24,7 +24,8 @@
         },
         exec: '',
         bashlist: [
-        ]
+        ],
+        webSocket: 'null'
       }
     },
     created () {
@@ -36,6 +37,41 @@
     computed: {
     },
     methods: {
+      createWebSocket (urlValue) {
+        if (window.WebSocket) return new WebSocket(urlValue)
+        return false
+      },
+      sendMsg (toWho, msg) {
+        let thiz = this
+        if (this.webSocket === 'null') {
+          this.webSocket = this.createWebSocket('ws://127.0.0.1:3000')
+          this.webSocket.onopen = function (evt) {
+            console.log('进入聊天室')
+            thiz.sendMsg(toWho, msg)
+          }
+          this.webSocket.onmessage = function (evt) {
+            // 这是服务端返回的数据
+            let msg = JSON.parse(evt.data)
+            thiz.$log({
+              title: 'chat',
+              output: msg.from + ': ' + msg.content
+            })
+            thiz.$toast(' M E S S A G E')
+          }
+          // 关闭连接
+          this.webSocket.onclose = function (evt) {
+            console.log('Connection closed.')
+          }
+        } else {
+          let message = {
+            from: this.$store.state.Counter.userInfo.name,
+            to: toWho,
+            content: msg
+          }
+          console.log(message)
+          this.webSocket.send(JSON.stringify(message))
+        }
+      },
       focusOnInput () {
         this.$refs.inputItem.focus()
       },
@@ -60,6 +96,22 @@
       },
       runCommand () {
         let thiz = this
+        if (thiz.activeItem.command.charAt(0) === '@' || thiz.activeItem.command.charAt(0) === '＠') {
+          let arr = thiz.activeItem.command.split(/@|:|：|＠/)
+          console.log(arr)
+          if (arr.length === 3) {
+            console.log('send')
+            this.sendMsg(arr[1], arr[2])
+            this.activeItem.result = '发送消息成功'
+            this.bashlist.push(JSON.parse(JSON.stringify(thiz.activeItem)))
+            this.activeItem.command = ''
+            thiz.$nextTick(() => {
+              let scroll = thiz.$refs.scroll
+              scroll.scrollTop = scroll.scrollHeight
+            })
+          } else console.log('form error')
+          return
+        }
         this.exec(thiz.activeItem.command + ';pwd', {cwd: thiz.activeItem.url}, function (error, stdout, stderr) {
           if (error) {
             stdout = error
