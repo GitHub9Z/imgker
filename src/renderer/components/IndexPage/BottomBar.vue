@@ -199,7 +199,7 @@
       listenMsg () {
         let thiz = this
         if (this.webSocket === 'close') {
-          this.webSocket = this.createWebSocket('ws://127.0.0.1:3000')
+          this.webSocket = this.createWebSocket('ws://47.94.197.84:3001')
           this.webSocket.onopen = function (evt) {
             console.log('进入聊天室')
             let message = {
