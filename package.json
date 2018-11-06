@@ -58,6 +58,7 @@
   "dependencies": {
     "axios": "^0.16.2",
     "moment": "^2.22.2",
+    "restler": "^3.4.0",
     "smalltalk": "^3.1.1",
     "vue": "^2.3.3",
     "vue-electron": "^1.0.6",

@@ -5,10 +5,11 @@
       <div class="bar view-bar" @mouseenter="onMouseOver('view')" @mouseleave="onMouseOut('view')" @click="onBarClick('view')" :style="{background: isviewshow?'rgb(2, 109, 2)':viewColor}">可视化数据</div>
     </div>
     <div class="view-content" v-if="isviewshow">
-      <gk-data-box class="data-box" :item="{'title':'浏览量','data':'27126'}"></gk-data-box>
-      <gk-data-box class="data-box" :item="{'title':'访问量','data':'3213'}"></gk-data-box>
-      <gk-data-box class="data-box" :item="{'title':'营业额','data':'34211'}"></gk-data-box>
-      <gk-data-box class="data-box" :item="{'title':'成交量','data':'243'}"></gk-data-box>
+      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ad1.png?date=' + JSON.stringify(new Date()),'adName':'ad1'}"></gk-image-box>
+      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ad2.png?date=' + JSON.stringify(new Date()),'adName':'ad2'}"></gk-image-box>
+      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ad3.png?date=' + JSON.stringify(new Date()),'adName':'ad3'}"></gk-image-box>
+      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ew1.png?date=' + JSON.stringify(new Date()),'adName':'ew1'}"></gk-image-box>
+      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ew2.png?date=' + JSON.stringify(new Date()),'adName':'ew2'}"></gk-image-box>
     </div>
     <div class="bar-content">
       <div class="bar api-bar" @mouseenter="onMouseOver('api')" @mouseleave="onMouseOut('api')" @click="onBarClick('api')" :style="{background: isapishow?'rgb(2, 109, 2)':apiColor}">管理员接口</div>
@@ -59,6 +60,7 @@
   import GkDropMenu from '@/components/GkViews/GkDropMenu'
   import GkPrompt from '@/components/GkViews/GkPrompt'
   import GkDataBox from '@/components/GkViews/GkDataBox'
+  import GkImageBox from '@/components/GkViews/GkImageBox'
   export default {
     props: ['url'],
     components: {
@@ -66,7 +68,8 @@
       GkDropMenu,
       GkEditText,
       GkPrompt,
-      GkDataBox
+      GkDataBox,
+      GkImageBox
     },
     data () {
       return {

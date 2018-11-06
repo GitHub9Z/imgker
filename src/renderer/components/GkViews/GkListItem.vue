@@ -33,7 +33,6 @@
       }
     },
     created () {
-      this.load()
     },
     computed: {
       load () {
