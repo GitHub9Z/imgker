@@ -5,7 +5,7 @@
       <div class="bar view-bar" @mouseenter="onMouseOver('view')" @mouseleave="onMouseOut('view')" @click="onBarClick('view')" :style="{background: isviewshow?'rgb(2, 109, 2)':viewColor}">可视化数据</div>
     </div>
     <div class="view-content" v-if="isviewshow">
-      <gk-image-box class="data-box" v-for="item in filelist" :key="item" :item="{'adURL':url + '/upload/image/' + item + '.png?date=' + JSON.stringify(new Date()),'adName':item}"></gk-image-box>
+      <gk-image-box class="data-box" v-for="item in filelist" :key="item" :item="{'adURL':url + '/upload/image/' + item + '.png?date=' + JSON.stringify(new Date()),'adName':item}" :url="url"></gk-image-box>
     </div>
     <div class="bar-content">
       <div class="bar api-bar" @mouseenter="onMouseOver('api')" @mouseleave="onMouseOut('api')" @click="onBarClick('api')" :style="{background: isapishow?'rgb(2, 109, 2)':apiColor}">管理员接口</div>

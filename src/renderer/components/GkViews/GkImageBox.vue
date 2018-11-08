@@ -12,7 +12,7 @@
 
 <script>
   export default {
-    props: ['item'],
+    props: ['item', 'url'],
     data () {
       return {
         boxColor: 'rgb(61, 61, 61)'
@@ -80,13 +80,13 @@
           headers: {'Content-Type': 'multipart/form-data'}
         }
         // 添加请求头
-        this.$axios.post('https://xaoji.com/api/uploadImage', param, config)
+        this.$axios.post(this.url + '/api/uploadImage', param, config)
           .then(response => {
             if (response.data.code === 0) {
               // self.ImgUrl = response.data.data
             }
             console.log(response.data)
-            thiz.item.adURL = 'https://xaoji.com/upload/image/' + this.item.adName + '.png?date=' + JSON.stringify(new Date())
+            thiz.item.adURL = thiz.url + '/upload/image/' + this.item.adName + '.png?date=' + JSON.stringify(new Date())
           })
       },
       onMouseOver () {
