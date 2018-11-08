@@ -4,7 +4,7 @@ import toastComponent from './GkToast.vue'
 const ToastConstructor = vue.extend(toastComponent)
 
 // 定义弹出组件的函数 接收2个参数, 要显示的文本 和 显示时间
-function showToast (text, duration = 2000) {
+function showToast (text, kind = 'success') {
   // 实例化一个 GkToast.vue
   const toastDom = new ToastConstructor({
     el: document.createElement('div'),
@@ -14,7 +14,8 @@ function showToast (text, duration = 2000) {
         text: text,
         alpha: 1,
         right: -250,
-        status: 'normal'
+        status: 'normal',
+        kind: kind
       }
     }
   })

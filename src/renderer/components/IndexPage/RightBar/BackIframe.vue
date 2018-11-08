@@ -5,11 +5,7 @@
       <div class="bar view-bar" @mouseenter="onMouseOver('view')" @mouseleave="onMouseOut('view')" @click="onBarClick('view')" :style="{background: isviewshow?'rgb(2, 109, 2)':viewColor}">可视化数据</div>
     </div>
     <div class="view-content" v-if="isviewshow">
-      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ad1.png?date=' + JSON.stringify(new Date()),'adName':'ad1'}"></gk-image-box>
-      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ad2.png?date=' + JSON.stringify(new Date()),'adName':'ad2'}"></gk-image-box>
-      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ad3.png?date=' + JSON.stringify(new Date()),'adName':'ad3'}"></gk-image-box>
-      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ew1.png?date=' + JSON.stringify(new Date()),'adName':'ew1'}"></gk-image-box>
-      <gk-image-box class="data-box" :item="{'adURL':'https://xaoji.com/upload/image/ew2.png?date=' + JSON.stringify(new Date()),'adName':'ew2'}"></gk-image-box>
+      <gk-image-box class="data-box" v-for="item in filelist" :key="item" :item="{'adURL':url + '/upload/image/' + item + '.png?date=' + JSON.stringify(new Date()),'adName':item}"></gk-image-box>
     </div>
     <div class="bar-content">
       <div class="bar api-bar" @mouseenter="onMouseOver('api')" @mouseleave="onMouseOut('api')" @click="onBarClick('api')" :style="{background: isapishow?'rgb(2, 109, 2)':apiColor}">管理员接口</div>
@@ -82,6 +78,7 @@
         viewColor: '',
         apiColor: '',
         dbColor: '',
+        filelist: [],
         apilist: [],
         dblist: [],
         showdblist: [],
@@ -167,6 +164,7 @@
           })
           .catch(function (error) {
             thiz.$store.commit('CLEAR_LIST')
+            thiz.$store.commit('SET_IS_LOADING', false)
             thiz.dblist = []
             thiz.showdblist = []
             thiz.$smalltalk.alert('加载文件', '请检查网络连接')
@@ -324,10 +322,15 @@
             thiz.apilist = resdata.data
           })
           .catch(function (error) {
-            thiz.$smalltalk.alert('加载文件', '请检查网络连接')
-              .then(() => {
-                console.log(error)
-              })
+            console.log(error)
+          })
+        this.$axios.get(this.url + '/api/getFileList', data)
+          .then(function (response) {
+            let resdata = response.data
+            thiz.filelist = resdata.data
+          })
+          .catch(function (error) {
+            console.log(error)
           })
         this.$axios.get(this.url + '/api/getDBList', data)
           .then(function (response) {
@@ -345,19 +348,17 @@
                 thiz.dblist = resdata.data
                 thiz.showdblist = JSON.parse(JSON.stringify(resdata.data)).slice((thiz.page - 1) * 40, thiz.page * 40)
                 thiz.$store.commit('SET_IS_LOADING', false)
+                thiz.$toast(' S U C C E S S')
               })
               .catch(function (error) {
-                thiz.$smalltalk.alert('加载文件', '请检查网络连接')
-                  .then(() => {
-                    console.log(error)
-                  })
+                thiz.$store.commit('SET_IS_LOADING', false)
+                console.log(error)
               })
           })
           .catch(function (error) {
-            thiz.$smalltalk.alert('加载文件', '请检查网络连接')
-              .then(() => {
-                console.log(error)
-              })
+            thiz.$store.commit('SET_IS_LOADING', false)
+            thiz.$toast(' E R R O R', 'error')
+            console.log(error)
           })
       },
       onPromptSubmit (data) {
@@ -429,11 +430,36 @@
   }
 
   .view-content {
-    width: calc(100% + 8px);
+    width: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction:row;
     align-items: center;
-    overflow: hidden;
+    overflow: auto;
+  }
+
+  .view-content::-webkit-scrollbar {/*滚动条整体样式*/
+    width: 15px;     /*高宽分别对应横竖滚动条的尺寸*/
+    height: 10px;
+  }
+
+  .view-content::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+    background: #535353;
+  }
+
+  .view-content::-webkit-scrollbar-track {/*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+    background: transparent;
+  }
+
+  .view-content::-webkit-scrollbar-thumb:window-inactive {
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+    background: transparent;
+  }
+
+  .view-content::-webkit-scrollbar-thumb:hover {
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
+    background: #666666;
   }
 
   .data-box {

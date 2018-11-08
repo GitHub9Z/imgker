@@ -1,6 +1,6 @@
 <template>
   <!-- gk-toast{*} -->
-  <div class="toast-logo-area" :style="{opacity: alpha, right: right + 'px'}" @mouseover="active" @mouseout="normal">
+  <div class="toast-logo-area" :style="{opacity: alpha, right: right + 'px', background: kind === 'error'? 'rgb(240, 101, 101)' : 'rgb(28, 135, 241)'}" @mouseover="active" @mouseout="normal">
     <img class="logo-img" src='@/assets/icon/success_white_icon.png' :style="{transform: 'rotate(' + rotateNum + 'deg)'}">{{text}}
   </div>
 </template>
@@ -71,7 +71,7 @@
     position: absolute; right: 10px; bottom: 35px; z-index: 321;
     margin: auto;
     box-shadow: 0px 0px 10px rgb(8, 8, 8);  
-    background: rgb(28, 135, 241);
+    background: rgb(240, 101, 101);
     overflow: hidden;
     font-size: 18px;
     line-height: 30px;
