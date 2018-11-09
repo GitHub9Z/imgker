@@ -38,6 +38,10 @@
           <img v-if="isChoosed" src='@/assets/icon/edit_down_icon.png'>
           <img v-if="!isChoosed" src='@/assets/icon/edit_up_icon.png'>
         </div>
+        <div class="icon" @click="onUpClick">
+          <img v-if="isChoosed && menulist[0] === 'WpTagModel'" src='@/assets/icon/up_down_icon.png'>
+          <img v-else src='@/assets/icon/up_up_icon.png'>
+        </div>
         <div class="block"></div>
         <div class="arrow-content">
           <img class="arrow" :src="backArrowUrl" @click="onBackClick">
@@ -192,6 +196,40 @@
       },
       onFlashClick () {
         this.loadData()
+      },
+      onUpClick () {
+        if (this.menulist[0] !== 'WpTagModel') return
+        let thiz = this
+        let item = {}
+        for (let key in this.menuitems[this.menulist[0]]) {
+          if (key === 'views_num' || key === 'tag_status') item[key] = 'DEFAULT+10000000'
+          else item[key] = 'DEFAULT'
+        }
+        this.$axios.get(this.url + '/api/update', {
+          params: {
+            'db': thiz.menulist[0],
+            'model': 'multiEdit',
+            'item': JSON.stringify(item),
+            'items': JSON.stringify(thiz.$store.state.Counter.choosedItems)
+          }
+        })
+          .then(function (response) {
+            thiz.$log({
+              title: 'update',
+              output: 'RESPONSE: ' + JSON.stringify(response, Object.keys(response), 1000)
+            })
+            thiz.onFlashClick()
+            let message = {
+              'oper': 'loadData'
+            }
+            thiz.$emit('childOper', message)
+            thiz.$toast(' S U C C E S S')
+          })
+          .catch(function (error) {
+            thiz.$smalltalk.alert('更新', error)
+              .then(() => {
+              })
+          })
       },
       onEditClick () {
         if (this.$store.state.Counter.choosedItems.length > 1) {
