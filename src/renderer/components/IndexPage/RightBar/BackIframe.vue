@@ -30,6 +30,10 @@
         <div class="icon" @click="onAddClick">
           <img src='@/assets/icon/add_white_icon.png'>
         </div>
+        <div class="icon">
+          <img src='@/assets/icon/madd_white_icon.png'>
+          <input class="upload-file" name="file" type="file" accept=".doc,.docx,.xml,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" @change="onMultiAddClick"/>
+        </div>
         <div class="icon" @click="onDeleteClick">
           <img v-if="isChoosed" src='@/assets/icon/delete_down_icon.png'>
           <img v-if="!isChoosed" src='@/assets/icon/delete_up_icon.png'>
@@ -39,8 +43,9 @@
           <img v-if="!isChoosed" src='@/assets/icon/edit_up_icon.png'>
         </div>
         <div class="icon" @click="onUpClick">
-          <img v-if="isChoosed && menulist[0] === 'WpTagModel'" src='@/assets/icon/up_down_icon.png'>
-          <img v-else src='@/assets/icon/up_up_icon.png'>
+          <img v-if="isChoosed && menulist[0] === 'WpTagModel' && !isAllUp" src='@/assets/icon/up_white_icon.png'>
+          <img v-else-if="isChoosed && menulist[0] === 'WpTagModel' && isAllUp" src='@/assets/icon/up_blue_icon.png'>
+          <img v-else src='@/assets/icon/up_gray_icon.png'>
         </div>
         <div class="block"></div>
         <div class="arrow-content">
@@ -109,6 +114,16 @@
       frontArrowUrl () {
         if (this.page >= (this.dblist.length / 40)) return require('@/assets/icon/arrow_front_false_icon.png')
         else return require('@/assets/icon/arrow_front_true_icon.png')
+      },
+      isAllUp () {
+        let status = true
+        for (let index in this.$store.state.Counter.choosedItems) {
+          if (this.$store.state.Counter.choosedItems[index]['views_num'] < 9000000) {
+            status = false
+            break
+          }
+        }
+        return status
       }
     },
     methods: {
@@ -197,13 +212,63 @@
       onFlashClick () {
         this.loadData()
       },
+      onMultiAddClick (e) {
+        let thiz = this
+        let file = e.target.files[0]
+        let reader = new FileReader()
+        reader.onload = e => {
+          let data = []
+          try {
+            data = JSON.parse(e.target.result)
+          } catch (error) {
+            thiz.$toast(' E R R O R', 'error')
+            console.log(error)
+            return
+          }
+          if (data.length >= 1) {
+            thiz.$axios.get(thiz.url + '/api/update', {
+              params: {
+                'db': thiz.menulist[0],
+                'model': 'multiEdit',
+                'item': {'from': 'json-file'},
+                'items': e.target.result
+              }
+            })
+              .then(function (response) {
+                thiz.$log({
+                  title: 'update',
+                  output: 'RESPONSE: ' + JSON.stringify(response, Object.keys(response), 1000)
+                })
+                thiz.onFlashClick()
+                let message = {
+                  'oper': 'loadData'
+                }
+                thiz.$emit('childOper', message)
+                thiz.$toast(' S U C C E S S')
+              })
+              .catch(function (error) {
+                thiz.$smalltalk.alert('更新', error)
+                  .then(() => {
+                  })
+              })
+          } else thiz.$toast(' E R R O R', 'error')
+        }
+        reader.readAsText(file, 'gbk')
+      },
       onUpClick () {
-        if (this.menulist[0] !== 'WpTagModel') return
+        if (!this.isChoosed && this.menulist[0] !== 'WpTagModel') return
         let thiz = this
         let item = {}
-        for (let key in this.menuitems[this.menulist[0]]) {
-          if (key === 'views_num' || key === 'tag_status') item[key] = 'DEFAULT+10000000'
-          else item[key] = 'DEFAULT'
+        if (!this.isAllUp) {
+          for (let key in this.menuitems[this.menulist[0]]) {
+            if (key === 'views_num' || key === 'tag_status') item[key] = 'DEFAULT+10000000'
+            else item[key] = 'DEFAULT'
+          }
+        } else {
+          for (let key in this.menuitems[this.menulist[0]]) {
+            if (key === 'views_num' || key === 'tag_status') item[key] = 'DEFAULT-10000000'
+            else item[key] = 'DEFAULT'
+          }
         }
         this.$axios.get(this.url + '/api/update', {
           params: {
@@ -565,6 +630,8 @@
   .icon {
     width: 45px;
     height: 40px;
+    position: relative;
+    overflow: hidden;
     padding: 8px;
     margin: 0 0 0 3px;
     display: flex;
@@ -577,4 +644,12 @@
     width: 24px;
     height: 24px;
   }
+
+  .upload-file {
+		position: absolute;
+		font-size: 100px;
+		right: 0;
+		top: 0;
+		opacity: 0;
+	}
 </style>

@@ -1,5 +1,6 @@
 <template>
   <div class="container">
+    <top-bar @childOper="onChildOper" class="top-container"></top-bar>
     <div class="main-container">
         <div class="left-bar">
           <left-bar></left-bar>
@@ -26,15 +27,17 @@
   import BottomBar from '@/components/IndexPage/BottomBar'
   import RightBar from '@/components/IndexPage/RightBar'
   import LeftBar from '@/components/IndexPage/LeftBar'
+  import TopBar from '@/components/IndexPage/TopBar'
   import GkLogin from '@/components/GkViews/GkLogin'
   import GkEnlist from '@/components/GkViews/GkEnlist'
   import GkLoading from '@/components/GkViews/GkLoading'
   export default {
     components: {
       MiddleBarList,
+      MiddleBarTop,
       RightBar,
       LeftBar,
-      MiddleBarTop,
+      TopBar,
       GkLogin,
       GkEnlist,
       BottomBar,
@@ -242,7 +245,7 @@
 
     .main-container {
         width: 100vw;
-        height: calc(100vh - 25px);
+        height: calc(100vh - 60px);
         background: #222222;
         display: flex;
         flex-direction: row;

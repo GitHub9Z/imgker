@@ -11,6 +11,10 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 let mainWindow
+const ipc = require('electron').ipcMain
+
+// let electron = require('electron')
+// const Menu = electron.Menu
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
@@ -19,10 +23,13 @@ function createWindow () {
   /**
    * Initial window options
    */
+  // Menu.setApplicationMenu(null)
+
   mainWindow = new BrowserWindow({
     height: 600,
     useContentSize: true,
-    width: 1000
+    width: 1000,
+    frame: false
   })
 
   mainWindow.loadURL(winURL)
@@ -30,6 +37,20 @@ function createWindow () {
     mainWindow = null
   })
 }
+
+ipc.on('getMsg', (sys, msg) => {
+  switch (msg) {
+    case 'close':
+      mainWindow.close()
+      break
+    case 'min':
+      mainWindow.minimize()
+      break
+    case 'max':
+      mainWindow.maximize()
+      break
+  }
+})
 
 app.on('ready', createWindow)
 
