@@ -5,10 +5,12 @@ import App from './App'
 import router from './router'
 import store from './store'
 import toastRegistry from './components/GkViews/GkToast/index'
-
+import vueHljs from 'vue-hljs'
+import 'vue-hljs/dist/vue-hljs.min.css'
+ 
+Vue.use(vueHljs)
 // 这里也可以直接执行 toastRegistry()
 Vue.use(toastRegistry)
-
 // const Env = require('./config/env.js')
 Vue.prototype.$axios = axios
 axios.defaults.baseURL = 'http://47.94.197.84:3000/api/'
