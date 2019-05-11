@@ -117,17 +117,14 @@
                 }))) : ''}
             }])
             .then(answers => {
-                switch(answers) {
-    ${Item.child ? Item.child.map(item => this.convertItemToCode(item)).join('') : ''}
+                switch(answers) {${Item.child ? Item.child.map(item => this.convertItemToCode(item)).join('') : ''}
                 }
             });
         `
                     case 1:
                         return `
-                    case '${Item.title}': 
-                        ${Item.child ? Item.child.map(item => this.convertItemToCode(item)).join('') : ''}
-                        break;
-        `
+                    case '${Item.title}': ${Item.child ? Item.child.map(item => this.convertItemToCode(item)).join('') : ''}
+                        break;`
                     case 2:
                         return `
         inquirer

@@ -12,10 +12,11 @@
     </div>
     <div class="iframe-content">
       <back-iframe class='back-ifame right-page-content' :url="item.url" @childOper="onChildOper" v-if="item.kind==='back'" v-for="item in fileslist" :key='item.id' :style="{display: item.id === chooseId?'block':'none'}"></back-iframe>
-      <command-iframe class='commnand-ifame right-page-content'></command-iframe>
+      <command-iframe class='commnand-ifame right-page-content' :file="item" @childOper="onChildOper" v-if="item.kind==='command'" v-for="item in fileslist" :key='item.id' v-show="item.id === chooseId"></command-iframe>
+      <home-iframe class='home-ifame right-page-content'></home-iframe>
       <iframe class='right-page-content' :ref="item.id === chooseId?'active':item.id" v-if="item.kind==='file'" :src="item.url" v-for="item in fileslist" :key='item.id' :style="{display: item.id === chooseId?'block':'none'}" frameborder="no" border="0" marginwidth="0" marginheight="0" allowtransparency="yes"></iframe>
     </div>
-    <console class="right-bar-console"></console>
+    <console class="right-bar-console" @childOper="onChildOper"></console>
   </div>
 </template>
 <script>
@@ -23,13 +24,15 @@
   import Console from '@/components/IndexPage/RightBar/Console'
   import BackIframe from '@/components/IndexPage/RightBar/BackIframe'
   import CommandIframe from '@/components/IndexPage/RightBar/CommandIframe'
+  import HomeIframe from '@/components/IndexPage/RightBar/HomeIframe'
   export default {
     props: ['fileslist', 'chooseId'],
     components: {
       Tab,
       Console,
       BackIframe,
-      CommandIframe
+      CommandIframe,
+      HomeIframe
     },
     data () {
       return {

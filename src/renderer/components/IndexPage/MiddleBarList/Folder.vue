@@ -204,6 +204,34 @@
           }
         })
 
+        let newCommandMenu = new MenuItem({
+          label: '新建命令行',
+          accelerator: 'CmdOrCtrl+X',
+          click () {
+            let smalltalk = require('smalltalk/legacy')
+            // let utils = require('../../../../static/utils.js')
+            let message = {
+              'oper': 'new',
+              'id': thiz.rndNum(3),
+              'name': '',
+              'fath': thiz.item.id,
+              'kind': 'command',
+              'url': '',
+              'lib_id': thiz.$store.state.Counter.userInfo.lib[0].id
+            }
+            smalltalk.prompt('新建命令行', '请输入命令行名称', '新建命令行')
+              .then(function (name) {
+                if (name !== null && name !== '') {
+                  thiz.childStatus = 'block'
+                  message.name = name
+                  thiz.$emit('childOper', message)
+                }
+              }, function () {
+                console.log('close')
+              })
+          }
+        })
+
         let newBackMenu = new MenuItem({
           label: '新建后台',
           accelerator: 'CmdOrCtrl+B',
@@ -240,6 +268,7 @@
           }
         })
         menu1.append(newFolderMenu)
+        menu1.append(newCommandMenu)
         menu1.append(newFileMenu)
         menu1.append(newBackMenu)
         menu1.append(editMenu)

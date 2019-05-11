@@ -7,9 +7,13 @@
             </div>
         </div>
         <div class="content-tree">
-            <tree :treeArr="this.treeObj" @codeUpdate="handleCodeUpdate"></tree>
+            <tree :treeArr="treeObj" @codeUpdate="handleCodeUpdate"></tree>
         </div>
         <div class="content-code" v-highlight v-html="code">
+        </div>
+        <div class="content-console">
+            <img src="@/assets/icon/copy_gray_icon.png">
+            <img src="@/assets/icon/save_gray_icon.png" @click="handleSaveCommand">
         </div>
     </div>
 </template>
@@ -21,7 +25,7 @@
     } from 'vuex'
     import tree from './CommandIframe/tree.vue'
     export default {
-        props: [],
+        props: ['file'],
         components: {
             tree
         },
@@ -101,23 +105,51 @@
                 }]
             }
         },
-        created() {},
+        created() {
+            if (this.file.url) this.treeObj = JSON.parse(this.file.url)
+            console.log('dahsduas', this.treeObj)
+        },
         computed: {
             ...mapState('commandIframe', ['dragItem'])
         },
         methods: {
             ...mapMutations('commandIframe', ['COMMIT_DRAG_ITEM']),
             drag(item) {
-                this.COMMIT_DRAG_ITEM(item)
+                this.COMMIT_DRAG_ITEM({
+                    title: item.title,
+                    type: item.type
+                })
                 console.log('当前拖拽', this.dragItem)
             },
             handleCodeUpdate(code) {
                 const Showdown = require('showdown')
                 let converter = new Showdown.Converter()
                 let beautify = require('js-beautify').js
-                let beautifiedCode = beautify(code, { indent_size: 2, space_in_empty_paren: true })
+                let beautifiedCode = beautify(code, {
+                    indent_size: 2,
+                    space_in_empty_paren: true
+                })
                 console.log(beautifiedCode)
-                this.code = converter.makeHtml('`' + beautifiedCode + '`')
+                this.code = converter.makeHtml('```\n' + beautifiedCode + '\n```')
+            },
+            handleSaveCommand() {
+                let tmpFile = JSON.parse(JSON.stringify(this.file))
+                tmpFile.url = JSON.stringify(this.treeObj)
+                this.$axios.get('submitFile', {
+                        params: tmpFile
+                    })
+                    .then(response => {
+                        let message = {
+                            'from': 'command',
+                            'oper': 'loadData'
+                        }
+                        this.$emit('childOper', message)
+                        this.$toast('保存成功')
+                    })
+                    .catch(error => {
+                        this.$smalltalk.alert('编辑命令行', error)
+                            .then(() => {})
+                    })
             }
         }
     }
@@ -153,6 +185,17 @@
             overflow: auto;
             background: #282828;
             user-select: text;
+        }
+        .content-console {
+            position: fixed;
+            right: 10px;
+            top: 80px;
+            img {
+                height: 30px;
+                width: 30px;
+                padding: 10px;
+                margin: 0;
+            }
         }
     }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <!-- index{middle-bar-list{*}} -->
-  <div class='middle-bar-list-content'> 
+  <div class='middle-bar-list-content'>
     <folder :item="item" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="item in fileslist" :key='item' v-if="item.fath===''&&item.kind==='folder'">
       <folder :item="itemTwo" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemTwo in fileslist" :key='itemTwo' v-if="itemTwo.fath===item.id&&itemTwo.kind==='folder'">
         <folder :item="itemthree" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="itemthree in fileslist" :key='itemthree' v-if="itemthree.fath===itemTwo.id&&itemthree.kind==='folder'">
@@ -16,21 +16,22 @@
     </folder>
     <file :item="item" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="item in fileslist" :key='item' v-if="item.fath===''&&item.kind!=='folder'"></file>
     <div class='block' @contextmenu.stop="renderMenu" @drop.stop="drop($event)" @dragover.stop="allowDrop($event)" @dragenter.stop="enter($event)" @dragleave.stop="leave($event)" :style="{background: isDragedOver?'rgb(87, 86, 86)':''}">
-    <!-- {static-list{deprecated v0->v1.0.0}}
-    <folder name="hello" id="1" :chooseId="chooseId" v-on:childClick="onChildClick">
-      <folder name="hello-1" id="2"  :chooseId="chooseId" v-on:childClick="onChildClick">
-        <folder name="hello-1-1" id="4"  :chooseId="chooseId" v-on:childClick="onChildClick">
-          <file name="file-1-1" id="5"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
+      <!-- {static-list{deprecated v0->v1.0.0}}
+        <folder name="hello" id="1" :chooseId="chooseId" v-on:childClick="onChildClick">
+          <folder name="hello-1" id="2"  :chooseId="chooseId" v-on:childClick="onChildClick">
+            <folder name="hello-1-1" id="4"  :chooseId="chooseId" v-on:childClick="onChildClick">
+              <file name="file-1-1" id="5"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
+            </folder>
+            <file name="file-1" id="6"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
+          </folder>
         </folder>
-        <file name="file-1" id="6"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
-      </folder>
-    </folder>
-    <folder name="world" id="3"  :chooseId="chooseId" v-on:childClick="onChildClick">
-      <file name="file-2" id="7"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
-    </folder>
-    -->
-  </div>
+        <folder name="world" id="3"  :chooseId="chooseId" v-on:childClick="onChildClick">
+          <file name="file-2" id="7"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
+        </folder>
+        -->
+    </div>
 </template>
+
 <script>
   import Folder from '@/components/IndexPage/MiddleBarList/Folder'
   import File from '@/components/IndexPage/MiddleBarList/File'
@@ -40,10 +41,9 @@
       Folder,
       File
     },
-    data () {
+    data() {
       return {
-        ddfileslist: [
-          {
+        ddfileslist: [{
             'id': '1',
             'name': 'folder-1',
             'fath': '',
@@ -103,11 +103,10 @@
         isDragedOver: false
       }
     },
-    created () {
+    created() {
       this.getFilesList()
     },
-    mounted () {
-    },
+    mounted() {},
     computed: {
       /* {string-render{deprecated v0->v1.0.0}}
       renderHtml () {
@@ -122,7 +121,7 @@
       } */
     },
     methods: {
-      drop (event) {
+      drop(event) {
         this.isDragedOver = false
         let message = {
           'oper': 'drop',
@@ -130,19 +129,19 @@
         }
         this.onChildOper(message)
       },
-      allowDrop (event) {
+      allowDrop(event) {
         event.preventDefault()
         this.isDragedOver = true
       },
-      enter (event) {
+      enter(event) {
         this.isDragedOver = true
         console.log('enter')
       },
-      leave (event) {
+      leave(event) {
         this.isDragedOver = false
         console.log('leave')
       },
-      renderMenu () {
+      renderMenu() {
         const MenuItem = this.$electron.remote.MenuItem
         const Menu = this.$electron.remote.Menu
         const menu1 = new Menu()
@@ -150,7 +149,7 @@
         let newFolderMenu = new MenuItem({
           label: '新建文件夹',
           accelerator: 'CmdOrCtrl+C',
-          click () {
+          click() {
             let smalltalk = require('smalltalk/legacy')
             // let utils = require('../../../../static/utils.js')
             let message = {
@@ -163,12 +162,12 @@
               'lib_id': thiz.$store.state.Counter.userInfo.lib[0].id
             }
             smalltalk.prompt('新建文件夹', '请输入文件夹名称', '新建文件夹')
-              .then(function (name) {
+              .then(function(name) {
                 if (name !== null && name !== '') {
                   message.name = name
                   thiz.onChildOper(message)
                 }
-              }, function () {
+              }, function() {
                 console.log('close')
               })
           }
@@ -176,10 +175,10 @@
         menu1.append(newFolderMenu)
         menu1.popup(this.$electron.remote.getCurrentWindow())
       },
-      getFilesList () {
+      getFilesList() {
         // wait-for-add？网络请求
       },
-      onChildClick (data) {
+      onChildClick(data) {
         this.chooseId = data.id
         // eval("this.$refs."+data+".getfathStatus()")？refs如何遍历
         // this.$forceUpdate()！强制渲染元素
@@ -193,7 +192,7 @@
           }
         }
       },
-      onChildOper (data) {
+      onChildOper(data) {
         switch (data.oper) {
           case 'click':
             this.onChildClick(data)
@@ -215,67 +214,66 @@
             break
         }
       },
-      onChildRename (data) {
+      onChildRename(data) {
         let index
         let smalltalk = require('smalltalk/legacy')
         let thiz = this
         for (index in this.fileslist) {
-          if (this.fileslist[index].name === data.name) {
+          if (thiz.fileslist[index].name === data.name) {
             smalltalk.alert('重命名', '命名冲突')
-              .then(() => {
-              })
+              .then(() => {})
             return
           }
         }
         for (index in this.fileslist) {
           if (this.fileslist[index].id === data.id) {
-            this.fileslist[index].name = data.name
+            thiz.fileslist[index].name = data.name
             this.$axios.get('submitFile', {
-              params: {
-                ...thiz.fileslist[index]
-              }
-            })
-              .then(function (response) {
+                params: {
+                  ...thiz.fileslist[index]
+                }
+              })
+              .then(function(response) {
                 let message = {
                   'from': 'list',
                   'oper': 'loadData',
                   'id': data.id
                 }
                 thiz.$emit('childOper', message)
+                thiz.$nextTick(() => thiz.rebuildHistoryTree(`重命名文件${thiz.fileslist[index].name}`))
               })
-              .catch(function (error) {
+              .catch(function(error) {
                 smalltalk.alert('重命名', error)
-                  .then(() => {
-                  })
+                  .then(() => {})
               })
           }
         }
       },
-      onChildDrop (data) {
+      onChildDrop(data) {
         let smalltalk = require('smalltalk/legacy')
         let thiz = this
         let item = thiz.$store.state.Counter.dragItem
         item.fath = data.id
         this.$axios.get('submitFile', {
-          params: {
-            ...item
-          }
-        })
-          .then(function (response) {
+            params: {
+              ...item
+            }
+          })
+          .then(function(response) {
             let message = {
               'from': 'list',
               'oper': 'loadData',
               'id': data.id
             }
             thiz.$emit('childOper', message)
+            thiz.$nextTick(() => thiz.rebuildHistoryTree(`移动文件${item.name}`))
           })
-          .catch(function (error) {
+          .catch(function(error) {
             smalltalk.alert('重命名', error)
-              .then(() => {
-              })
+              .then(() => {})
           })
       },
-      onChildReurl (data) {
+      onChildReurl(data) {
         let index
         let smalltalk = require('smalltalk/legacy')
         let thiz = this
@@ -283,58 +281,57 @@
           if (this.fileslist[index].id === data.id) {
             this.fileslist[index].url = data.url
             this.$axios.get('submitFile', {
-              params: {
-                ...thiz.fileslist[index]
-              }
-            })
-              .then(function (response) {
+                params: {
+                  ...thiz.fileslist[index]
+                }
+              })
+              .then(function(response) {
                 let message = {
                   'from': 'list',
                   'oper': 'loadData',
                   'id': data.id
                 }
                 thiz.$emit('childOper', message)
+                thiz.$nextTick(() => thiz.rebuildHistoryTree(`编辑文件${thiz.fileslist[index].name}`))
               })
-              .catch(function (error) {
+              .catch(function(error) {
                 smalltalk.alert('修改 URL', error)
-                  .then(() => {
-                  })
+                  .then(() => {})
               })
           }
         }
       },
-      onChildNew (data) {
+      onChildNew(data) {
         let index
         let thiz = this
         let smalltalk = require('smalltalk/legacy')
         for (index in this.fileslist) {
-          if (this.fileslist[index].name === data.name) {
+          if (thiz.fileslist[index].name === data.name) {
             smalltalk.alert('新建', '命名冲突')
-              .then(() => {
-              })
+              .then(() => {})
             return
           }
         }
         this.$axios.get('submitFile', {
-          params: {
-            ...data
-          }
-        })
-          .then(function (response) {
+            params: {
+              ...data
+            }
+          })
+          .then(function(response) {
             let message = {
               'from': 'list',
               'oper': 'loadData',
               'id': data.id
             }
             thiz.$emit('childOper', message)
+            thiz.$nextTick(() => thiz.rebuildHistoryTree(`新建文件${data.name}`))
           })
-          .catch(function (error) {
+          .catch(function(error) {
             smalltalk.alert('新建', error)
-              .then(() => {
-              })
+              .then(() => {})
           })
       },
-      onChildDelete (data) {
+      onChildDelete(data) {
         let index
         let thiz = this
         let smalltalk = require('smalltalk/legacy')
@@ -345,33 +342,81 @@
             this.$emit('childOper', data)
             // this.fileslist.splice(index, 1)
             this.$axios.get('deleteFile', {
-              params: {
-                'delid': data.id
-              }
-            })
-              .then(function (response) {
+                params: {
+                  'delid': data.id
+                }
+              })
+              .then(function(response) {
                 let message = {
                   'from': 'list',
                   'oper': 'loadData',
                   'id': data.id
                 }
                 thiz.$emit('childOper', message)
+                thiz.$nextTick(() => thiz.rebuildHistoryTree(`删除文件${thiz.fileslist[index].name}`))
               })
-              .catch(function (error) {
+              .catch(function(error) {
                 smalltalk.alert('删除', error)
-                  .then(() => {
-                  })
+                  .then(() => {})
               })
             return
           }
         }
       },
-      rndNum (n) {
+      rndNum(n) {
         var rnd = ''
         for (var i = 0; i < n; i++) {
           rnd += Math.floor(Math.random() * 10)
         }
         return rnd
+      },
+      rebuildHistoryTree(msg) {
+        let currentTree = this.$store.state.Counter.userInfo.lib[0].history_tree
+        console.log('HAHAHHA', currentTree)
+        if (currentTree) {
+          currentTree = JSON.parse(currentTree)
+          console.log('文件库树', currentTree)
+          let HEAD = currentTree.HEAD.split('-')
+          let currentObject = currentTree
+          for (let index in HEAD) {
+            if (index === '0') continue
+            currentObject = currentObject.child[Number(HEAD[index])]
+          }
+          let newCommit = HEAD.join('-') + '-' + currentObject.child.length
+          currentObject.child.push({
+            commit: newCommit,
+            title: msg,
+            tree: this.fileslist,
+            child: []
+          })
+          currentTree.HEAD = newCommit
+        } else {
+          currentTree = {
+            commit: '0',
+            title: '项目初始化',
+            tree: this.fileslist,
+            HEAD: '0',
+            child: []
+          }
+        }
+        this.$axios.get('submitLib', {
+            params: {
+              id: this.$store.state.Counter.userInfo.lib[0].id,
+              history_tree: JSON.stringify(currentTree)
+            }
+          })
+          .then(response => {
+            this.$store.state.Counter.userInfo.lib[0].history_tree = JSON.stringify(currentTree)
+            console.log('shshsh', this.$store.state.Counter.userInfo)
+            let message = {
+              'from': 'list',
+              'oper': 'loadData'
+            }
+            this.$emit('childOper', message)
+          })
+          .catch(function(error) {
+            console.log(error)
+          })
       }
       /* {string-render{deprecated v0->v1.0.0}}
       renderItem (item) {
@@ -388,35 +433,40 @@
     }
   }
 </script>
+
 <style>
-  .middle-bar-list-content{
+  .middle-bar-list-content {
     width: 100%;
     height: calc(100% - 65px);
     padding: 8px 8px;
     overflow: scroll;
   }
-
-  .middle-bar-list-content::-webkit-scrollbar {/*滚动条整体样式*/
-    width: 1px;     /*高宽分别对应横竖滚动条的尺寸*/
+  
+  .middle-bar-list-content::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 1px;
+    /*高宽分别对应横竖滚动条的尺寸*/
     height: 1px;
   }
-
-  .middle-bar-list-content::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+  
+  .middle-bar-list-content::-webkit-scrollbar-thumb {
+    /*滚动条里面小方块*/
     -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
     background: transparent;
   }
-
-  .middle-bar-list-content::-webkit-scrollbar-track {/*滚动条里面轨道*/
+  
+  .middle-bar-list-content::-webkit-scrollbar-track {
+    /*滚动条里面轨道*/
     -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
     background: transparent;
   }
-
+  
   .middle-bar-list-content::-webkit-scrollbar-thumb:window-inactive {
     -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0);
     background: transparent;
   }
-
-  .block{
+  
+  .block {
     width: 100%;
     height: 100%;
   }

@@ -17,8 +17,12 @@
       }
     },
     created () {
-      if (this.item.kind === 'file') this.logoURL = require('@/assets/icon/url_blue_icon.png')
-      else if (this.item.kind === 'back') this.logoURL = require('@/assets/icon/back_green_icon.png')
+      let iconConfig = {
+        file: require('@/assets/icon/url_blue_icon.png'),
+        back: require('@/assets/icon/back_green_icon.png'),
+        command: require('@/assets/icon/code_yellow_icon.png')
+      }
+      this.logoURL = iconConfig[this.item.kind]
     },
     computed: {
       flashFathStatus () {

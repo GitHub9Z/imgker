@@ -7,17 +7,20 @@
     </div>
     <shell class='console-shell' :style="{display:active === '终端'?'block':'none'}"></shell>
     <outputer class='console-shell' :style="{display:active === '输出'?'block':'none'}"></outputer>
+    <git-iframe :tree="JSON.parse($store.state.Counter.userInfo.lib[0].history_tree)" @childOper="onChildOper" v-show="active === '版本控制台'"></git-iframe>
   </div>
 </template>
 <script>
   import Shell from '@/components/IndexPage/RightBar/Console/Shell'
   import Outputer from '@/components/IndexPage/RightBar/Console/Output'
+  import GitIframe from '@/components/IndexPage/RightBar/GitIframe'
   import GkButton from '@/components/GkViews/GkButton'
   export default {
     components: {
       Outputer,
       Shell,
-      GkButton
+      GkButton,
+      GitIframe
     },
     data () {
       return {
@@ -32,7 +35,7 @@
             'color': '#525252'
           },
           {
-            'text': '调试控制台',
+            'text': '版本控制台',
             'color': '#525252'
           },
           {
@@ -57,6 +60,9 @@
                 this.onButtonClick(data)
                 break
             }
+            break
+          case 'git':
+            this.$emit('childOper', data)
             break
         }
       },
