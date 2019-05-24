@@ -2,7 +2,7 @@
     <!-- index{right-bar{git-iframe{*}}} -->
     <div class="content">
         <div class="content-tree" :style="{'background-image': `url(${require('@/assets/icon/block_gray_icon.png')})`}">
-            <tree :tree="tree" @reset="handleGitReset"></tree>
+            <tree :tree="tree" @reset="handleGitReset" v-if="tree"></tree>
         </div>
     </div>
 </template>

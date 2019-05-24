@@ -69,21 +69,28 @@
         /* const spawn = require('child_process').spawn
               alert('spawn：' + JSON.stringify(spawn))
               const ls = spawn('ls', ['-lh', '/usr'])
-        
+          
               ls.stdout.on('data', (data) => {
                 alert('输出：' + data)
               })
-        
+          
               ls.stderr.on('data', (data) => {
                 alert('错误：' + data)
               })
-        
+          
               ls.on('close', (code) => {
                 alert('子进程退出码：' + code)
               }) */
       },
       onChildOper(data) {
         switch (data.from) {
+          case 'global':
+            switch (data.oper) {
+              case 'saveTree':
+                this.rebuildHistoryTree(data.core)
+                break
+            }
+            break
           case 'list':
             switch (data.oper) {
               case 'click':
@@ -122,6 +129,7 @@
             switch (data.oper) {
               case 'loadData':
                 this.onChildUpdate(data)
+                this.choosedfileslist = []
                 break
             }
             break
@@ -167,6 +175,7 @@
         }
       },
       getHEADFilesList() {
+        if (!this.$store.state.Counter.userInfo.lib[0].history_tree) return []
         let tmp = JSON.parse(this.$store.state.Counter.userInfo.lib[0].history_tree).HEAD.split('-').filter(item => item)
         console.log('W QI', tmp)
         let Item = {
@@ -182,6 +191,7 @@
         // thiz.$store.commit('FLASH_USER', thiz)
         this.$nextTick(() => {
           thiz.fileslist = thiz.getHEADFilesList()
+          thiz.$forceUpdate()
           if (Object.getOwnPropertyNames(data).length > 1) {
             thiz.chooseId = data.id
             for (let index in thiz.fileslist) {
@@ -227,6 +237,50 @@
       },
       onPromptSubmit(data) {
         this.getFilesList()
+      },
+      rebuildHistoryTree(msg) {
+        let currentTree = this.$store.state.Counter.userInfo.lib[0].history_tree
+        console.log('HAHAHHA', currentTree)
+        if (currentTree) {
+          currentTree = JSON.parse(currentTree)
+          console.log('文件库树', currentTree)
+          let HEAD = currentTree.HEAD.split('-')
+          let currentObject = currentTree
+          for (let index in HEAD) {
+            if (index === '0') continue
+            currentObject = currentObject.child[Number(HEAD[index])]
+          }
+          let newCommit = HEAD.join('-') + '-' + currentObject.child.length
+          currentObject.child.push({
+            commit: newCommit,
+            title: `${msg} ${new Date()}`,
+            tree: this.fileslist,
+            child: []
+          })
+          currentTree.HEAD = newCommit
+        } else {
+          currentTree = {
+            commit: '0',
+            title: '项目初始化',
+            tree: this.fileslist,
+            HEAD: '0',
+            child: []
+          }
+        }
+        this.$axios.get('submitLib', {
+            params: {
+              id: this.$store.state.Counter.userInfo.lib[0].id,
+              history_tree: JSON.stringify(currentTree)
+            }
+          })
+          .then(response => {
+            this.$store.state.Counter.userInfo.lib[0].history_tree = JSON.stringify(currentTree)
+            this.$store.state.Counter.userInfo = JSON.parse(JSON.stringify(this.$store.state.Counter.userInfo))
+            this.onChildUpdate({})
+          })
+          .catch(function(error) {
+            console.log(error)
+          })
       }
     }
   }

@@ -17,18 +17,18 @@
     <file :item="item" :chooseId="chooseId" v-on:childOper="onChildOper" v-for="item in fileslist" :key='item' v-if="item.fath===''&&item.kind!=='folder'"></file>
     <div class='block' @contextmenu.stop="renderMenu" @drop.stop="drop($event)" @dragover.stop="allowDrop($event)" @dragenter.stop="enter($event)" @dragleave.stop="leave($event)" :style="{background: isDragedOver?'rgb(87, 86, 86)':''}">
       <!-- {static-list{deprecated v0->v1.0.0}}
-        <folder name="hello" id="1" :chooseId="chooseId" v-on:childClick="onChildClick">
-          <folder name="hello-1" id="2"  :chooseId="chooseId" v-on:childClick="onChildClick">
-            <folder name="hello-1-1" id="4"  :chooseId="chooseId" v-on:childClick="onChildClick">
-              <file name="file-1-1" id="5"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
-            </folder>
-            <file name="file-1" id="6"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
-          </folder>
-        </folder>
-        <folder name="world" id="3"  :chooseId="chooseId" v-on:childClick="onChildClick">
-          <file name="file-2" id="7"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
-        </folder>
-        -->
+                    <folder name="hello" id="1" :chooseId="chooseId" v-on:childClick="onChildClick">
+                      <folder name="hello-1" id="2"  :chooseId="chooseId" v-on:childClick="onChildClick">
+                        <folder name="hello-1-1" id="4"  :chooseId="chooseId" v-on:childClick="onChildClick">
+                          <file name="file-1-1" id="5"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
+                        </folder>
+                        <file name="file-1" id="6"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
+                      </folder>
+                    </folder>
+                    <folder name="world" id="3"  :chooseId="chooseId" v-on:childClick="onChildClick">
+                      <file name="file-2" id="7"  :chooseId="chooseId" v-on:childClick="onChildClick"></file>
+                    </folder>
+                    -->
     </div>
 </template>
 
@@ -234,13 +234,15 @@
                 }
               })
               .then(function(response) {
-                let message = {
-                  'from': 'list',
-                  'oper': 'loadData',
-                  'id': data.id
-                }
-                thiz.$emit('childOper', message)
-                thiz.$nextTick(() => thiz.rebuildHistoryTree(`重命名文件${thiz.fileslist[index].name}`))
+                thiz.rebuildHistoryTree(`重命名[${thiz.fileslist[index].name}]`)
+                thiz.$nextTick(() => {
+                  let message = {
+                    'from': 'list',
+                    'oper': 'loadData',
+                    'id': data.id
+                  }
+                  thiz.$emit('childOper', message)
+                })
               })
               .catch(function(error) {
                 smalltalk.alert('重命名', error)
@@ -260,13 +262,15 @@
             }
           })
           .then(function(response) {
-            let message = {
-              'from': 'list',
-              'oper': 'loadData',
-              'id': data.id
-            }
-            thiz.$emit('childOper', message)
-            thiz.$nextTick(() => thiz.rebuildHistoryTree(`移动文件${item.name}`))
+            thiz.rebuildHistoryTree(`移动[${item.name}]`)
+            thiz.$nextTick(() => {
+              let message = {
+                'from': 'list',
+                'oper': 'loadData',
+                'id': data.id
+              }
+              thiz.$emit('childOper', message)
+            })
           })
           .catch(function(error) {
             smalltalk.alert('重命名', error)
@@ -286,13 +290,15 @@
                 }
               })
               .then(function(response) {
-                let message = {
-                  'from': 'list',
-                  'oper': 'loadData',
-                  'id': data.id
-                }
-                thiz.$emit('childOper', message)
-                thiz.$nextTick(() => thiz.rebuildHistoryTree(`编辑文件${thiz.fileslist[index].name}`))
+                thiz.rebuildHistoryTree(`编辑[${thiz.fileslist[index].name}]`)
+                thiz.$nextTick(() => {
+                  let message = {
+                    'from': 'list',
+                    'oper': 'loadData',
+                    'id': data.id
+                  }
+                  thiz.$emit('childOper', message)
+                })
               })
               .catch(function(error) {
                 smalltalk.alert('修改 URL', error)
@@ -318,13 +324,16 @@
             }
           })
           .then(function(response) {
-            let message = {
-              'from': 'list',
-              'oper': 'loadData',
-              'id': data.id
-            }
-            thiz.$emit('childOper', message)
-            thiz.$nextTick(() => thiz.rebuildHistoryTree(`新建文件${data.name}`))
+            thiz.fileslist.push(data)
+            thiz.rebuildHistoryTree(`新建[${data.name}]`)
+            thiz.$nextTick(() => {
+              let message = {
+                'from': 'list',
+                'oper': 'loadData',
+                'id': data.id
+              }
+              thiz.$emit('childOper', message)
+            })
           })
           .catch(function(error) {
             smalltalk.alert('新建', error)
@@ -339,6 +348,8 @@
           if (this.fileslist[index].id === data.id) {
             data.oper = 'close'
             data.lastChoose = this.chooseId
+            const fileName = this.fileslist[index].name
+            this.fileslist.splice(index, 1)
             this.$emit('childOper', data)
             // this.fileslist.splice(index, 1)
             this.$axios.get('deleteFile', {
@@ -347,13 +358,15 @@
                 }
               })
               .then(function(response) {
-                let message = {
-                  'from': 'list',
-                  'oper': 'loadData',
-                  'id': data.id
-                }
-                thiz.$emit('childOper', message)
-                thiz.$nextTick(() => thiz.rebuildHistoryTree(`删除文件${thiz.fileslist[index].name}`))
+                thiz.rebuildHistoryTree(`删除[${fileName}]`)
+                thiz.$nextTick(() => {
+                  let message = {
+                    'from': 'list',
+                    'oper': 'loadData',
+                    'id': data.id
+                  }
+                  thiz.$emit('childOper', message)
+                })
               })
               .catch(function(error) {
                 smalltalk.alert('删除', error)
@@ -371,52 +384,12 @@
         return rnd
       },
       rebuildHistoryTree(msg) {
-        let currentTree = this.$store.state.Counter.userInfo.lib[0].history_tree
-        console.log('HAHAHHA', currentTree)
-        if (currentTree) {
-          currentTree = JSON.parse(currentTree)
-          console.log('文件库树', currentTree)
-          let HEAD = currentTree.HEAD.split('-')
-          let currentObject = currentTree
-          for (let index in HEAD) {
-            if (index === '0') continue
-            currentObject = currentObject.child[Number(HEAD[index])]
-          }
-          let newCommit = HEAD.join('-') + '-' + currentObject.child.length
-          currentObject.child.push({
-            commit: newCommit,
-            title: msg,
-            tree: this.fileslist,
-            child: []
-          })
-          currentTree.HEAD = newCommit
-        } else {
-          currentTree = {
-            commit: '0',
-            title: '项目初始化',
-            tree: this.fileslist,
-            HEAD: '0',
-            child: []
-          }
+        let message = {
+          'from': 'global',
+          'oper': 'saveTree',
+          'core': msg
         }
-        this.$axios.get('submitLib', {
-            params: {
-              id: this.$store.state.Counter.userInfo.lib[0].id,
-              history_tree: JSON.stringify(currentTree)
-            }
-          })
-          .then(response => {
-            this.$store.state.Counter.userInfo.lib[0].history_tree = JSON.stringify(currentTree)
-            console.log('shshsh', this.$store.state.Counter.userInfo)
-            let message = {
-              'from': 'list',
-              'oper': 'loadData'
-            }
-            this.$emit('childOper', message)
-          })
-          .catch(function(error) {
-            console.log(error)
-          })
+        this.$emit('childOper', message)
       }
       /* {string-render{deprecated v0->v1.0.0}}
       renderItem (item) {

@@ -7,7 +7,7 @@
     </div>
     <shell class='console-shell' :style="{display:active === '终端'?'block':'none'}"></shell>
     <outputer class='console-shell' :style="{display:active === '输出'?'block':'none'}"></outputer>
-    <git-iframe :tree="JSON.parse($store.state.Counter.userInfo.lib[0].history_tree)" @childOper="onChildOper" v-show="active === '版本控制台'"></git-iframe>
+    <git-iframe v-if="$store.state.Counter.userInfo.lib[0].history_tree" :tree="JSON.parse($store.state.Counter.userInfo.lib[0].history_tree)" @childOper="onChildOper" v-show="active === '版本控制台'"></git-iframe>
   </div>
 </template>
 <script>

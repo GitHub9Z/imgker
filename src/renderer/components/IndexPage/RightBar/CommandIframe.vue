@@ -133,23 +133,14 @@
                 this.code = converter.makeHtml('```\n' + beautifiedCode + '\n```')
             },
             handleSaveCommand() {
-                let tmpFile = JSON.parse(JSON.stringify(this.file))
-                tmpFile.url = JSON.stringify(this.treeObj)
-                this.$axios.get('submitFile', {
-                        params: tmpFile
-                    })
-                    .then(response => {
-                        let message = {
-                            'from': 'command',
-                            'oper': 'loadData'
-                        }
-                        this.$emit('childOper', message)
-                        this.$toast('保存成功')
-                    })
-                    .catch(error => {
-                        this.$smalltalk.alert('编辑命令行', error)
-                            .then(() => {})
-                    })
+                this.file.url = JSON.stringify(this.treeObj)
+                let message = {
+                    'from': 'global',
+                    'oper': 'saveTree',
+                    'core': `编辑命令行[${this.file.name}]`
+                }
+                this.$emit('childOper', message)
+                this.$toast('保存成功')
             }
         }
     }
